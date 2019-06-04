@@ -26,6 +26,6 @@ WHERE
 select (COUNT(distinct ?country) as ?sum)
 WHERE
 {
-	?country is_a country ; government_type ?gov.
+	?country is_a wiki/Country ; government_type ?gov.
 	FILTER(regex(?gov, "monarchy"))
 }
