@@ -271,7 +271,7 @@ def get_country_info(country_link, with_prime, with_presi):
     # get government types - there can be many!
     government_dict = get_country_government(info_box)
     info_dict['government_types'] = government_dict if len(government_dict) else None
-    
+
     # add country link
     info_dict['country_link'] = country_link
     return info_dict
@@ -287,7 +287,7 @@ def build_ontology_from_info(country_info):
         <government_type> <is_government_type_of> <country>
         <country> <has_government_type> <government_type>
         <city> <capital_of> <country>
-        <date> <birthday_of> <person>
+        <person> <birthday> <date>
         <name> <is_a> <country>
         <name> <is_a> <city>
         <name> <is_a> <person>
@@ -310,24 +310,59 @@ def build_ontology_from_info(country_info):
     area = URIRef("https://en.wikipedia.org/wiki/Area")
     is_a = URIRef("https://en.wikipedia.org/wiki/Is-a")
     government_type = URIRef("https://en.wikipedia.org/wiki/Government")
+    type_to_country = URIRef("http://example.org/government_to_country")
     birthday = URIRef("https://en.wikipedia.org/wiki/Birthday")
 
     # add relations for each country
-    for country_name, cdata in country_info:
+    for country_name, cdata in country_info.items():
+        clink = URIRef(WIKIPEDIA_BASE_URL + cdata['country_link'])
         # add to is_a country relation
-        ontology_graph.add((cdata['country_link'], is_a, country))
+        ontology_graph.add((clink, is_a, country))
 
         # add capital city to ontology relations
-        if 'capital_city_link' in cdata:
-            ontology_graph.add((cdata['capital_city_link'], is_a, city))  # add to is_a city
-            ontology_graph.add((cdata['capital_city_link'], capital, cdata['country_link']))
+        if cdata['capital_city_link']:
+            capital_link = URIRef(WIKIPEDIA_BASE_URL + cdata['capital_city_link'])
+            ontology_graph.add((capital_link, is_a, city))  # add to is_a city
+            ontology_graph.add((capital_link, capital, clink))
 
         # add the prime minister
-        if 'prime_minister_link' in cdata:            
-            ontology_graph.add((cdata['prime_minister_link'], is_a, person))  # make person
-            ontology_graph.add((cdata['prime_minister_link'], prime_minister, cdata['country_link']))  # make prime
+        if cdata['prime_minister_link']:
+            pmlink = URIRef(WIKIPEDIA_BASE_URL + cdata['prime_minister_link'])
+            ontology_graph.add((pmlink, is_a, person))  # make person
+            ontology_graph.add((pmlink, prime_minister, clink))  # make prime
+            ontology_graph.add((pmlink, job, prime_minister))
+            # add birthday
+            if cdata['prime_minister_bday']:
+                prime_bday = Literal(cdata['prime_minister_bday'], datatype=XSD.date)
+                ontology_graph.add((pmlink, birthday, prime_bday))
 
-    return
+        # add the president
+        if cdata['president_link']:
+            prlink = URIRef(WIKIPEDIA_BASE_URL + cdata['president_link'])
+            ontology_graph.add((prlink, is_a, person))
+            ontology_graph.add((prlink, president, clink))
+            ontology_graph.add((prlink, job, president))
+            # add birthday
+            if cdata['president_bday']:
+                pres_bday = Literal(cdata['president_bday'], datatype=XSD.date)
+                ontology_graph.add((prlink, birthday, pres_bday))
+
+        # add the population
+        if cdata['population']:
+            ontology_graph.add((clink, population, Literal(cdata['population'], datatype=XSD.positiveInteger)))
+
+        # add the area
+        if cdata['area']:
+            ontology_graph.add((clink, area, Literal(cdata['area'], datatype=XSD.positiveInteger)))
+
+        # add government types
+        if cdata['government_types']:
+            for gt in cdata['government_types'].values():
+                glink = URIRef(WIKIPEDIA_BASE_URL + gt)
+                ontology_graph.add((clink, government_type, glink))  # country to type
+                ontology_graph.add((glink, type_to_country, clink))  # type to country
+    return ontology_graph
+
 
 def main():
     # get links to country wikipedia pages
@@ -342,7 +377,7 @@ def main():
     for country, link in country_links.items():
         print('working on: ', country)
         full_link = WIKIPEDIA_BASE_URL + link
-        cinfo = get_country_info(full_link, with_prime, with_presi)        
+        cinfo = get_country_info(full_link, with_prime, with_presi)
         country_data[country] = cinfo
 
     # save country data
@@ -352,5 +387,13 @@ def main():
         print("saved: ", pickle_name)
 
 
+def main1():
+    country_data = pickle.load(open('country_info.p', 'rb'))
+    ontology = build_ontology_from_info(country_data)
+    ontology.serialize('country_ontology.nt', format='nt')
+
+
+    return 
+
 if __name__ == '__main__':
-    main()
+    main1()
