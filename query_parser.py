@@ -1,9 +1,9 @@
 import re
 
 # regular expressions for matching questions
-presi_re = "^Who(\s+)is(\s+)the(\s+)president(\s+)of(\s+)(\w+)(\?+)(\s*)$"
-prime_re = "^Who(\s+)is(\s+)the(\s+)prime(\s+)minister(\s+)of(\s+)(\w+)(\?+)(\s*)$"
-population_re = "^What(\s+)is(\s+)the(\s+)population(\s+)of(\s+)(\w+)(\?+)(\s*)$"
+presi_re = "^Who(\s+)is(\s+)the(\s+)president(\s+)of(\s+)(\w+)(\s*)(\w*)(\?+)(\s*)$"
+prime_re = "^Who(\s+)is(\s+)the(\s+)prime(\s+)minister(\s+)of(\s+)(\w+)(\s*)(\w*)(\?+)(\s*)$"
+population_re = "^What(\s+)is(\s+)the(\s+)population(\s+)of(\s+)(\w+)(\s*)(\w*)(\?+)$"
 area_re = "^What(\s+)is(\s+)the(\s+)area(\s+)of(\s+)(\w+)(\?+)(\s*)$"
 govern_re = "^What(\s+)is(\s+)the(\s+)government(\s+)of(\s+)(\w+)(\?+)(\s*)$"
 capital_re = "^What(\s+)is(\s+)the(\s+)capital(\s+)of(\s+)(\w+)(\?+)(\s*)$"
@@ -58,16 +58,9 @@ def extract_who_is_person(nlp_query):
     
 
 def main():
-    example1 = "Who is the prime minister of Democratic Republic of the Congo?"
-    example2 = "What is the population of United States?"
-    example3 = "What is the area of Israel?"
-    example4 = "What is the government of britain?"
-    example5 = "What is the capital of Israel?"
-    example6 = "When was the president of united states born?"
-    example7 = "Who is Jon Snow?"
-    
-    person = extract_who_is_person(example7)
-    print("extracted country: {}".format(person))
+    example = "What is the population of Falkland Islands?"    
+    country = extract_population_country(example)
+    print("extracted country: {}".format(country))
 
     return
 
@@ -93,7 +86,7 @@ def main1():
         # what is the population of <country>
         elif re.match(population_re, query):
             country = extract_population_country(query)
-            print("population query, country: {}".format(query))
+            print("population query, country: {}".format(country))
         
         # what is the area of <country>
         elif re.match(area_re, query):
