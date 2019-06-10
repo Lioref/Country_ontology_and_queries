@@ -5,10 +5,15 @@ import requests
 from rdflib import URIRef, Literal, XSD
 import rdflib
 import re
+import unicodedata
 
 
 COUNTRY_WIKI_URL = "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population"
 WIKIPEDIA_BASE_URL = "https://en.wikipedia.org"
+
+def strip_accents(s):
+   return ''.join(c for c in unicodedata.normalize('NFD', s)
+                  if unicodedata.category(c) != 'Mn')
 
 
 def normalize_text(text):
@@ -17,8 +22,7 @@ def normalize_text(text):
     :param text: any string
     :return: normalized text
     """
-    striped = '_'.join(re.split("\s+", text.strip().lower().replace("-", "_")))
-
+    striped = strip_accents('_'.join(re.split("\s+", text.strip().lower().replace("-", "_"))))
     return ''.join([c for c in striped if (c.isalpha() or c == "_")])
 
 
