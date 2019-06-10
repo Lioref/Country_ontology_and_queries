@@ -3,7 +3,7 @@
 SELECT (COUNT(distinct ?country) as ?sum)
 WHERE
 {
-	?country is_a wiki/Country. 
+	?country <https://en.wikipedia.org/wiki/Is-a> <https://en.wikipedia.org/wiki/Country> . 
 }
 
 ## Prime ministers in the world
@@ -11,14 +11,16 @@ WHERE
 select (COUNT(distinct ?person) as ?sum)
 WHERE
 {
-	?person is_a wiki/Person ; job wiki/Prime_minister.
+	?person <https://en.wikipedia.org/wiki/Is-a> <https://en.wikipedia.org/wiki/Person> . 
+	?person <https://en.wikipedia.org/wiki/Job> <https://en.wikipedia.org/wiki/Prime_minister> .
 }
 
 ## Republic government types
 select (COUNT(distinct ?country) as ?sum)
 WHERE
 {
-	?country is_a wiki/Country ; government_type ?gov.
+	?country <https://en.wikipedia.org/wiki/Is-a> <https://en.wikipedia.org/wiki/Country> .
+	?country <https://en.wikipedia.org/wiki/Government> ?gov .
 	FILTER(regex(?gov, "republic"))
 }
  
@@ -26,6 +28,7 @@ WHERE
 select (COUNT(distinct ?country) as ?sum)
 WHERE
 {
-	?country is_a wiki/Country ; government_type ?gov.
+	?country <https://en.wikipedia.org/wiki/Is-a> <https://en.wikipedia.org/wiki/Country> .
+	?country <https://en.wikipedia.org/wiki/Government> ?gov .
 	FILTER(regex(?gov, "monarchy"))
 }
