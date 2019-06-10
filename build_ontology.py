@@ -1,8 +1,10 @@
 from lxml import html
+import lxml
 import pickle
 import requests
 from rdflib import URIRef, Literal, XSD
 import rdflib
+import re
 
 
 COUNTRY_WIKI_URL = "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population"
@@ -15,7 +17,7 @@ def normalize_text(text):
     :param text: any string
     :return: normalized text
     """
-    striped = text.strip().lower().replace(" ", "_").replace("-", "_")
+    striped = '_'.join(re.split("\s+", text.strip().lower().replace("-", "_")))
 
     return ''.join([c for c in striped if (c.isalpha() or c == "_")])
 
@@ -186,9 +188,16 @@ def get_country_government(infobox):
     :return: dictionary gov_type_name -> gove_type_wiki_link
     """
     government_dict = {}  # maps government types to wiki pages repersenting them
-    government_a = infobox.xpath("descendant::tr[descendant::a[contains(text(), 'Government')] or descendant::th[contains(text(), 'Government')]]/td/a[not(contains(@href, 'cite_note')) and not(@class)]")
-    for a_link in government_a:
-        government_dict[normalize_text(a_link.attrib['title'])] = a_link.attrib['href']
+    government_items = infobox.xpath("descendant::tr[descendant::a[contains(text(), 'Government')] or descendant::th[contains(text(), 'Government')]]/td//node()")
+    for gov_i in government_items:
+        if isinstance(gov_i, html.HtmlElement) and gov_i.tag == 'a':  # only take the de jure government types
+            if ('title' in gov_i.attrib) and (gov_i.attrib['title'] == "De jure" or gov_i.attrib['title'] == "De facto"):
+                break
+            elif 'href' in gov_i.attrib and 'title' in gov_i.attrib:  # only if it has a link
+                government_dict[normalize_text(gov_i.attrib['title'])] = gov_i.attrib['href']
+        elif isinstance(gov_i, lxml.etree._ElementUnicodeResult):
+            if ('de jure' in gov_i) or ('De jure' in gov_i) or ('De facto' in gov_i) or ('de facto' in gov_i):
+                break
     return government_dict
 
 
@@ -386,6 +395,10 @@ def main():
         pickle.dump(country_data, out)
         print("saved: ", pickle_name)
 
+    # create the ontology and save it
+    ontology = build_ontology_from_info(country_data)
+    ontology.serialize('country_ontology.nt', format='nt')
+
 
 def main1():
     country_data = pickle.load(open('country_info.p', 'rb'))
@@ -396,4 +409,4 @@ def main1():
     return 
 
 if __name__ == '__main__':
-    main1()
+    main()
