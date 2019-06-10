@@ -1,16 +1,15 @@
 import re
 
 # regular expressions for matching questions
-presi_re = "^Who(\s+)is(\s+)the(\s+)president(\s+)of(\s+)(\w+)(\s*)(\w*)(\?+)(\s*)$"
-prime_re = "^Who(\s+)is(\s+)the(\s+)prime(\s+)minister(\s+)of(\s+)(\w+)(\s*)(\w*)(\?+)(\s*)$"
-population_re = "^What(\s+)is(\s+)the(\s+)population(\s+)of(\s+)(\w+)(\s*)(\w*)(\?+)$"
-area_re = "^What(\s+)is(\s+)the(\s+)area(\s+)of(\s+)(\w+)(\?+)(\s*)$"
-govern_re = "^What(\s+)is(\s+)the(\s+)government(\s+)of(\s+)(\w+)(\?+)(\s*)$"
-capital_re = "^What(\s+)is(\s+)the(\s+)capital(\s+)of(\s+)(\w+)(\?+)(\s*)$"
-presi_bday_re = "^When(\s+)was(\s+)the(\s+)president(\s+)of(\s+)(\w+)(\s+)born(\?+)(\s*)$"
-prime_bday_re = "^When(\s+)was(\s+)the(\s+)prime(\s+)minister(\s+)of(\s+)(\w+)(\s+)born(\?+)(\s*)$"
+presi_re = "^Who(\s+)is(\s+)the(\s+)president(\s+)of(\s+)(\w+)(\s*)(\w*)(\s*)(\?+)(\s*)$"
+prime_re = "^Who(\s+)is(\s+)the(\s+)prime(\s+)minister(\s+)of(\s+)(\w+)(\s*)(\w*)(\s*)(\?+)(\s*)$"
+population_re = "^What(\s+)is(\s+)the(\s+)population(\s+)of(\s+)(\w+)(\s*)(\w*)(\s*)(\?+)$"
+area_re = "^What(\s+)is(\s+)the(\s+)area(\s+)of(\s+)(\w+)(\s*)(\?+)(\s*)$"
+govern_re = "^What(\s+)is(\s+)the(\s+)government(\s+)of(\s+)(\w+)(\s*)(\?+)(\s*)$"
+capital_re = "^What(\s+)is(\s+)the(\s+)capital(\s+)of(\s+)(\w+)(\s*)(\?+)(\s*)$"
+presi_bday_re = "^When(\s+)was(\s+)the(\s+)president(\s+)of(\s+)(\w+)(\s+)born(\s*)(\?+)(\s*)$"
+prime_bday_re = "^When(\s+)was(\s+)the(\s+)prime(\s+)minister(\s+)of(\s+)(\w+)(\s+)born(\s*)(\?+)(\s*)$"
 who_re = "^Who(\s+)is(\s+)(\w+)(\s*)(\w*)(\s*)(\?+)(\s*)"
-
 
 # clean the text, lower case, remove punctuation and trailing spaces etc.
 def normalize_text(text):
@@ -19,7 +18,7 @@ def normalize_text(text):
     :param text: any string
     :return: normalized text
     """
-    striped = text.strip().lower().replace(" ", "_").replace("-", "_")
+    striped = '_'.join(re.split("\s+", text.strip().lower().replace("-", "_")))
 
     return ''.join([c for c in striped if (c.isalpha() or c == "_")])
 
@@ -55,13 +54,12 @@ def extract_birthday_country(nlp_query):
 
 def extract_who_is_person(nlp_query):
     return normalize_text(re.sub("Who(\s+)is(\s+)", "", nlp_query).replace("?", ""))
-    
+
 
 def main():
     example = "What is the population of Falkland Islands?"    
     country = extract_population_country(example)
     print("extracted country: {}".format(country))
-
     return
 
 def main1():
