@@ -32,3 +32,72 @@ WHERE
 	?country <https://en.wikipedia.org/wiki/Government> ?gov .
 	FILTER(regex(?gov, "monarchy"))
 }
+
+## NLP QUERIES
+## President of given country
+SELECT ?person
+WHERE 
+{
+    ?person <https://en.wikipedia.org/wiki/President> <https://en.wikipedia.org/wiki/{}> .
+}
+
+## Prime minister of given country
+SELECT ?person
+WHERE
+{
+    ?person <https://en.wikipedia.org/wiki/Prime_minister> <https://en.wikipedia.org/wiki/{}> .
+}
+
+## population of given country
+SELECT ?population
+WHERE
+{
+    <https://en.wikipedia.org/wiki/{}> <https://en.wikipedia.org/wiki/Population> ?population .
+}
+
+## area of given country
+SELECT ?area
+WHERE
+{
+    <https://en.wikipedia.org/wiki/{}> <https://en.wikipedia.org/wiki/Population> ?area .
+}
+
+## capital of country
+SELECT ?capital
+WHERE
+{
+    ?capital <https://en.wikipedia.org/wiki/Capital_city> <https://en.wikipedia.org/wiki/{}> .
+}
+
+## birthday of president of country
+SELECT ?bday
+WHERE
+{
+    ?person <https://en.wikipedia.org/wiki/President> <https://en.wikipedia.org/wiki/{}> .
+    ?person <https://en.wikipedia.org/wiki/Birthday> ?bday .
+}
+
+## birthday of prime minister of country
+SELECT ?bday
+WHERE
+{
+    ?person <https://en.wikipedia.org/wiki/Prime_minister> <https://en.wikipedia.org/wiki/{}> .
+    ?person <https://en.wikipedia.org/wiki/Birthday> ?bday .    
+}
+
+## who is person
+SELECT (?position ?country)
+WHERE
+{
+    ?cand <https://en.wikipedia.org/wiki/Job> ?position .
+    FILTER(contains(lcase(str(?cand)), "%s"))
+    ?cand ?position ?country .
+}
+
+
+## government of country
+SELECT ?gov_type
+WHERE
+{
+    <https://en.wikipedia.org/wiki/{}> <https://en.wikipedia.org/wiki/Government> ?gov_type .
+}
