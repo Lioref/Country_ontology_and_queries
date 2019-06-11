@@ -328,7 +328,7 @@ def build_ontology_from_info(country_info):
 
     # add relations for each country
     for country_name, cdata in country_info.items():
-        clink = URIRef(WIKIPEDIA_BASE_URL + cdata['country_link'])
+        clink = URIRef(cdata['country_link'])
         # add to is_a country relation
         ontology_graph.add((clink, is_a, country))
 
@@ -401,13 +401,13 @@ def main():
 
     # create the ontology and save it
     ontology = build_ontology_from_info(country_data)
-    ontology.serialize('country_ontology.nt', format='nt')
+    ontology.serialize('ontology.nt', format='nt')
 
 
 def main1():
     country_data = pickle.load(open('country_info.p', 'rb'))
     ontology = build_ontology_from_info(country_data)
-    ontology.serialize('country_ontology.nt', format='nt')
+    ontology.serialize('ontology.nt', format='nt')
 
 
     return 
