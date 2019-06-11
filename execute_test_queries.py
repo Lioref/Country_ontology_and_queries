@@ -57,7 +57,7 @@ def monarchy_count_query(ontology):
 def main():
     # load ontology
     country_graph = rdflib.Graph()
-    country_graph.parse("country_ontology.nt", format="nt")
+    country_graph.parse("ontology.nt", format="nt")
 
     # prime minister count
     pm_count = prime_minister_count_query(country_graph)
