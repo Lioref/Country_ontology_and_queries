@@ -52,7 +52,7 @@ query_formats['area'] = """SELECT ?area
                            {
                                 ?country <https://en.wikipedia.org/wiki/Is-a> <https://en.wikipedia.org/wiki/Country> .
                                 FILTER (contains(lcase(str(?country)), "%s"))
-                                ?country <https://en.wikipedia.org/wiki/Population> ?area .
+                                ?country <https://en.wikipedia.org/wiki/Area> ?area .
                            }
                            """
 # capital query
@@ -191,7 +191,8 @@ def get_country_population(infobox):
     """
     population_estimate = infobox.xpath("descendant::tr[descendant::*[contains(text(), 'Population')]]/following::tr[1]/td//text()[1]")
     if len(population_estimate) > 0:
-        pop_num = clean_number(population_estimate[0])
+        estimate_strings = [e for e in population_estimate[0].split(" ") if not e.isspace() if e]
+        pop_num = clean_number(estimate_strings[0])
         assert pop_num
         return pop_num
     else:
@@ -259,8 +260,9 @@ def get_country_area(infobox):
     :return: area (int) or None if missing.
     """
     country_area = infobox.xpath("descendant::tr[contains(th//text(), 'Total')][1]/td[1]/text()[1]")
+    area_strings = [a for a in country_area[0].split(" ") if not a.isspace() if a]
     if len(country_area) > 0:
-        return int(clean_number(country_area[0]))
+        return int(clean_number(area_strings[0]))
     else:
         return None
 
@@ -452,7 +454,7 @@ def build_ontology_from_info(country_info):
     return ontology_graph
 
 
-def main_build_ontology():
+def main_build_ontology(out_path):
     # get links to country wikipedia pages
     country_links = get_country_links(COUNTRY_WIKI_URL)
 
@@ -466,7 +468,7 @@ def main_build_ontology():
 
     # create the ontology and save it
     ontology = build_ontology_from_info(country_data)
-    ontology.serialize('ontology.nt', format='nt')
+    ontology.serialize(out_path, format='nt')
     return
 
 
@@ -595,7 +597,7 @@ def get_response_string(query_key, result):
         for r in result:
             clean_type = ' '.join([p.capitalize() for p in r[0].replace(WIKIPEDIA_BASE_URL, "").replace("/wiki/", "").split("_")])
             type_list.append(clean_type)
-        return " ".join(type_list)
+        return ", ".join(type_list)
 
     elif query_key == "who":
         res_list = []
@@ -614,7 +616,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.func == "create":
-        main_build_ontology()
+        main_build_ontology(args.query_path)
 
     elif args.func == "question":
         # make sure ontology file exists in current directory
